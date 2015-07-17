@@ -1,7 +1,10 @@
 package org.openmuc.extensions.app.navigator;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,6 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.openmuc.framework.data.DoubleValue;
+import org.openmuc.framework.data.Flag;
 import org.openmuc.framework.data.IntValue;
 import org.openmuc.framework.data.Record;
 import org.openmuc.framework.dataaccess.Channel;
@@ -20,6 +26,7 @@ import org.openmuc.framework.dataaccess.DataAccessService;
 
 import com.siemens.eadvantage.ie.ImportEngineClient;
 import com.siemens.eadvantage.ie.command.Command;
+import com.siemens.eadvantage.ie.command.MeterReadingCommand;
 
 public class TestUploadTask {
 	
@@ -58,6 +65,36 @@ public class TestUploadTask {
 		task.run();
 		
 		verify(importEngineClient, times(2)).executeCommand((Command) anyObject());
+		
+	}
+	
+	@Test
+	public void testSendLatestRecord() throws Throwable {
+		
+		DataAccessService dataAccessService = mock(DataAccessService.class);
+		Record record = new Record(new DoubleValue(10.0d), 10000l, Flag.VALID);
+		Channel channel = mock(Channel.class);
+		when(channel.getLatestRecord()).thenReturn(record);
+		when(dataAccessService.getChannel(anyString())).thenReturn(channel);
+		
+		List<String> channelIds = Arrays.asList("channel1");
+		when(dataAccessService.getAllIds()).thenReturn(channelIds);
+		
+		ImportEngineClient importEngineClient = mock(ImportEngineClient.class);
+		
+		
+			
+		UploadTask task = new UploadTask(dataAccessService, importEngineClient);
+		task.setDataRange(0);
+		task.run();
+		
+		verify(importEngineClient, times(1)).executeCommand((Command) anyObject());
+		
+		// check argument passed to mock
+		ArgumentCaptor<MeterReadingCommand> argument = ArgumentCaptor.forClass(MeterReadingCommand.class);
+		verify(importEngineClient).executeCommand(argument.capture());		
+		assertThat(argument.getValue().getReadings().size(), is(1));
+		assertThat(argument.getValue().getReadings().get(0).getValue(), is(10.0d));
 		
 	}
 	

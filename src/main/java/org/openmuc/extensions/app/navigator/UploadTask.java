@@ -60,18 +60,31 @@ public class UploadTask extends TimerTask {
 		for (String channelId : channelIds) {
 			Channel channel = dataAccessService.getChannel(channelId);
 			try {
-				List<Record> records = channel.getLoggedRecords(startTime - dataRange);
-				for (Record record : records) {
-					command.addMeterReading(new MeterReading(channelId, new DateTime(new Date(record.getTimestamp())), record.getValue().asDouble()));
-					recordCount++;
-					
-					if(recordCount % 5000 == 0) {	// max. number of data records in a single transmission is 5000
-						String result = importEngineClient.executeCommand(command);
-						logger.debug("Sent 5000 records to import engine ({})", result);
-						command = new MeterReadingCommand();
+				if (dataRange > 0) {
+					List<Record> records = channel.getLoggedRecords(startTime
+							- dataRange);
+					for (Record record : records) {
+						command.addMeterReading(new MeterReading(channelId,
+								new DateTime(new Date(record.getTimestamp())),
+								record.getValue().asDouble()));
+						recordCount++;
+
+						if (recordCount % 5000 == 0) { // max. number of data records in a single transmission is 5000
+							String result = importEngineClient
+									.executeCommand(command);
+							logger.debug(
+									"Sent 5000 records to import engine ({})",
+									result);
+							command = new MeterReadingCommand();
+						}
 					}
+				} else { // if dataRange is null, only the latest record will be transfered
+					Record latestRecord = channel.getLatestRecord();
+					command.addMeterReading(new MeterReading(channelId,
+							new DateTime(new Date(latestRecord.getTimestamp())),
+							latestRecord.getValue().asDouble()));
+					recordCount++;
 				}
-					
 			} catch (DataLoggerNotAvailableException e) {
 				logger.error("Could not retrive logged data because data logger is not available, upload task stopped");
 				setErrorChannel(true);
