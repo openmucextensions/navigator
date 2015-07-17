@@ -1,0 +1,11 @@
+command=METER_READING delimiter=; optionalColumnList=qualityAttribute,description
+cq_03_07_13_40_24;01/02/2015 11:00:00;1;33;Test Reading_0
+cq_03_07_13_40_24;01/02/2015 11:15:00;2;33;Test Reading_1
+cq_03_07_13_40_24;01/02/2015 11:30:00;3;33;Test Reading_2
+cq_03_07_13_40_24;01/02/2015 11:45:00;4;33;Test Reading_3
+cq_03_07_13_40_24;01/02/2015 12:00:00;5;33;Test Reading_4
+cq_03_07_13_40_24;01/02/2015 12:15:00;6;33;Test Reading_5
+cq_03_07_13_40_24;01/02/2015 12:30:00;7;33;Test Reading_6
+cq_03_07_13_40_24;01/02/2015 12:45:00;8;33;Test Reading_7
+cq_03_07_13_40_24;01/02/2015 13:00:00;9;33;Test Reading_8
+cq_03_07_13_40_24;01/02/2015 13:15:00;10;33;Test Reading_9 
